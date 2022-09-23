@@ -1,4 +1,5 @@
-import {useRef} from 'react';
+import {useRef, useState} from 'react';
+import path from 'path';
 
 export default function Home() {
   // Refs
@@ -7,19 +8,26 @@ export default function Home() {
 
   // Functions
 
+  const [feedbacks, setFeedbacks] = useState([]);
+
+  const getFeedbacks = async () => {
+    const response = await fetch('/api/feedback')
+      .then((res) => res.json())
+      .then((data) => setFeedbacks(data.feedback));
+  };
+
   const submitFormHandler = (event) => {
     event.preventDefault();
 
     const enteredEmail = emailInputRef.current.value;
     const enteredFeedback = feedbackInputRef.current.value;
 
-    // optional: Add validation
-
     const reqBody = {
       email: enteredEmail,
       text: enteredFeedback,
     };
 
+    // fetch /api/feedback
     fetch('/api/feedback', {
       method: 'POST',
       body: JSON.stringify(reqBody),
@@ -45,6 +53,16 @@ export default function Home() {
         </div>
         <button type="submit">Send Feedback</button>
       </form>
+
+      <hr />
+
+      <button onClick={getFeedbacks}>Get Feedbacks</button>
+
+      <ul>
+        {feedbacks.map((feedback) => (
+          <li key={feedback.id}> {feedback.feedbackText}</li>
+        ))}
+      </ul>
     </div>
   );
 }
